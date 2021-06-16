@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">MyEventNote</string>
+    <string name="search_title">搜尋</string>
+    <string name="toolbar_main_title">今天</string>
+    <string name="toolbar_event_title">新增記事</string>
+    <string name="toolbar_list_title">所有記事</string>
+    <string name="event_title">名稱</string>
+    <string name="event_notify">提醒</string>
+    <string name="event_location">地點</string>
+    <string name="event_income">收入</string>
+    <string name="event_cost">支出</string>
+    <string name="event_content">內容</string>
+    <string name="search_keyword">推薦關鍵字</string>
+</resources>
