@@ -160,7 +160,7 @@ public class EventEditActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
+    public boolean dispatchTouchEvent(MotionEvent ev) {  // 點選空白處收起鍵盤
         if (ev.getAction() ==  MotionEvent.ACTION_DOWN ) {
             View view = getCurrentFocus();
             if (isShouldHideKeyBord(view, ev)) {

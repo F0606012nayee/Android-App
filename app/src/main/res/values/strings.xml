@@ -10,5 +10,9 @@
     <string name="event_income">收入</string>
     <string name="event_cost">支出</string>
     <string name="event_content">內容</string>
-    <string name="search_keyword">推薦關鍵字</string>
+    <string name="file_backup">檔案備份</string>
+    <string name="file_import">檔案匯入</string>
+    <string name="delete_all">資料刪除</string>
+    <string name="backup_description">備份說明</string>
+    <string name="about">關於</string>
 </resources>

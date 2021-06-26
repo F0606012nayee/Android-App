@@ -54,9 +54,7 @@ public class SearchActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        queryAll();
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, emptyList);
-        recyclerView.setAdapter(adapter);
+        refresh();
     }
 
     private void findView() {
@@ -146,6 +144,12 @@ public class SearchActivity extends AppCompatActivity {
             }
         }
         RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, found);
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void refresh() {
+        queryAll();
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this, emptyList);
         recyclerView.setAdapter(adapter);
     }
 }

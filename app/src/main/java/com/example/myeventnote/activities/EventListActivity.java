@@ -55,9 +55,7 @@ public class EventListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        query(valueClass, value);
-        recyclerViewAdapter = new RecyclerViewAdapter(this, eventList);
-        recyclerView.setAdapter(recyclerViewAdapter);
+        refresh();
     }
 
     private void findView() {
@@ -256,5 +254,11 @@ public class EventListActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
         }
         cursor.close();
+    }
+
+    private void refresh() {
+        query(valueClass, value);
+        recyclerViewAdapter = new RecyclerViewAdapter(this, eventList);
+        recyclerView.setAdapter(recyclerViewAdapter);
     }
 }

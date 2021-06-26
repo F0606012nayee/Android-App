@@ -9,12 +9,27 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_backup"
-        android:title="備份"
+        android:id="@+id/action_backup_file"
+        android:title="@string/file_backup"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_import_file"
+        android:title="@string/file_import"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_delete_all"
+        android:title="@string/delete_all"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_backup_description"
+        android:title="@string/backup_description"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_about"
-        android:title="關於"
+        android:title="@string/about"
         app:showAsAction="never"/>
 </menu>

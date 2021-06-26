@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +24,7 @@ import androidx.core.util.Pair;
 
 import com.example.myeventnote.R;
 import com.example.myeventnote.adapters.EventAdapter;
+import com.example.myeventnote.backup.LocalBackup;
 import com.example.myeventnote.helpers.MySQLiteOpenHelper;
 import com.example.myeventnote.objects.Event;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -30,7 +32,7 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.text.ParseException;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private final String[] listMonth = { "前兩個月", "前一個月", "本月", "下個月", "下下個月" };
     private final String[] listYear = { "過去一年", "上半年", "今年", "下半年", "未來一年" };
     private final String[] listCustom = { "一天", "範圍" };
+    private LocalBackup localBackup;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,9 +72,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        query();
-        eventAdapter = new EventAdapter(this, eventList);
-        listView.setAdapter(eventAdapter);
+        refresh();
     }
 
     private void findView() {
@@ -91,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         mySQLiteOpenHelper = new MySQLiteOpenHelper(this);
         database = mySQLiteOpenHelper.getWritableDatabase();
+        localBackup = new LocalBackup(this);
 
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -241,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                     .setItems(listCustom, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (which == 0) {
+                            if (which == 0) { // 一天
                                 MaterialDatePicker<Long> picker = MaterialDatePicker.Builder.datePicker()
                                         .setTitleText("選擇日期")
                                         .build();
@@ -255,9 +257,9 @@ public class MainActivity extends AppCompatActivity {
                                         startActivity(intent);
                                     }
                                 });
-                                picker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
+                                picker.show(getSupportFragmentManager(), "Material_Date_Picker");
                             }
-                            else {
+                            else {  //範圍
                                 MaterialDatePicker<Pair<Long, Long>> picker = MaterialDatePicker.Builder.dateRangePicker()
                                         .setTitleText("選擇日期")
                                         .build();
@@ -272,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
                                         startActivity(intent);
                                     }
                                 });
-                                picker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
+                                picker.show(getSupportFragmentManager(), "Material_Date_Range_Picker");
                             }
                         }
                     })
@@ -314,20 +316,60 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
+        final MySQLiteOpenHelper helper = new MySQLiteOpenHelper(getApplicationContext());
         if (id == R.id.action_search) {
             Intent intent = new Intent(MainActivity.this, SearchActivity.class);
             startActivity(intent);
-            overridePendingTransition(R.anim.anim_no, R.anim.anim_no);
+            overridePendingTransition(R.anim.anim_no, R.anim.anim_no);  // 取消切換動畫
         }
-        else if (id == R.id.action_backup) {
-            Intent intent = new Intent(MainActivity.this, SignInActivity.class);
-            startActivity(intent);
-            overridePendingTransition(R.anim.anim_no, R.anim.anim_no);
+        else if (id == R.id.action_backup_file) {
+            Toast.makeText(MainActivity.this, "備份檔案", Toast.LENGTH_SHORT).show();
+            String outFileName = Environment.getExternalStorageDirectory().getPath() + File.separator + getResources().getString(R.string.app_name) + File.separator;
+            localBackup.performBackup(helper, outFileName);
+        }
+        else if (id == R.id.action_import_file) {
+            Toast.makeText(MainActivity.this, "匯入檔案", Toast.LENGTH_SHORT).show();
+            localBackup.performRestore(helper);
+        }
+        else if (id == R.id.action_backup_description) {
+            String text = "檔案儲存在MyEventNote資料夾內\n" +
+                    "匯入時從資料夾的檔案匯入";
+            new MaterialAlertDialogBuilder(MainActivity.this)
+                .setTitle("備份說明")
+                .setMessage(text)
+                .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .show();
+        }
+        else if (id == R.id.action_delete_all) { //清除資料
+            Toast.makeText(MainActivity.this, "刪除所有資料", Toast.LENGTH_SHORT).show();
+            new MaterialAlertDialogBuilder(this)
+                .setTitle("刪除所有記事")
+                .setMessage("所有記事資料即將刪除")
+                .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mySQLiteOpenHelper.deleteAll(database);
+                        refresh();
+                        Toast.makeText(MainActivity.this, "資料已刪除", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNeutralButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .show();
         }
         else if (id == R.id.action_about) {
             new MaterialAlertDialogBuilder(MainActivity.this)
                 .setTitle("關於")
-                .setMessage("開發者\n\t陳昌俊 陳立生 盧冠華\n\t劉承齊 徐浩瑋\n發布日期\n\t2021年5月30日")
+                .setMessage("開發者\n\t\t陳昌俊 陳立生 盧冠華\n\t\t劉承齊 徐浩瑋\n發布日期\n\t\t2021年5月30日")
                 .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -379,4 +421,9 @@ public class MainActivity extends AppCompatActivity {
         cursor.close();
     }
 
+    public void refresh() { // 刷新資料
+        query();
+        eventAdapter = new EventAdapter(this, eventList);
+        listView.setAdapter(eventAdapter);
+    }
 }
